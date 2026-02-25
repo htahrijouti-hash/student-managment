@@ -75,7 +75,7 @@ function initializeDatabase() {
     id: adminId,
     email: 'admin@example.com',
     name: 'Admin User',
-    password: '$2a$10$nOUIs5kJ7naTuTFkWK1Be.JjReWZL4S7zD8KK4q8SZHjVmjHpjVRi', // admin123 hashed
+    password: '$2a$10$PlWvj2DNL06zvpC5//mljOOrlJYx1khd/0NZRcONT3JUOEfFH3wJ6', // admin123 hashed
     role: 'admin',
   });
 
