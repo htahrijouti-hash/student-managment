@@ -59,9 +59,9 @@ export function getDB() {
   
   return {
     prepare: (sql: string) => ({
-      all: (params?: any) => executeQuery(sql, params, 'all'),
-      get: (params?: any) => executeQuery(sql, params, 'get'),
-      run: (params?: any) => executeQuery(sql, params, 'run'),
+      all: (...params: any[]) => executeQuery(sql, params, 'all'),
+      get: (...params: any[]) => executeQuery(sql, params, 'get'),
+      run: (...params: any[]) => executeQuery(sql, params, 'run'),
     }),
     pragma: (sql: string) => {},
     exec: (sql: string) => {},
