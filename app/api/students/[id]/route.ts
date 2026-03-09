@@ -4,8 +4,9 @@ import { getDB } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
     const session = await auth();
     if (!session) {
@@ -13,7 +14,7 @@ export async function GET(
     }
 
     const db = getDB();
-    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(params.id);
+    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
     
     if (!student) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
@@ -27,8 +28,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
     const session = await auth();
     if (!session) {
@@ -39,7 +41,7 @@ export async function PUT(
     const { firstName, lastName, email, phone, address, dateOfBirth, status } = body;
 
     const db = getDB();
-    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(params.id);
+    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
     
     if (!student) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
@@ -60,10 +62,10 @@ export async function PUT(
       dateOfBirth !== undefined ? dateOfBirth : (student as any).dateOfBirth,
       status || (student as any).status,
       updatedAt,
-      params.id
+      id
     );
 
-    const updated = db.prepare('SELECT * FROM students WHERE id = ?').get(params.id);
+    const updated = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
     return NextResponse.json(updated);
   } catch (error: any) {
     if (error.message.includes('UNIQUE constraint failed')) {
@@ -75,8 +77,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
     const session = await auth();
     if (!session) {
@@ -84,17 +87,17 @@ export async function DELETE(
     }
 
     const db = getDB();
-    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(params.id);
+    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
     
     if (!student) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
 
     // Delete enrollments first
-    db.prepare('DELETE FROM enrollments WHERE student_id = ?').run(params.id);
+    db.prepare('DELETE FROM enrollments WHERE student_id = ?').run(id);
     
     // Delete student
-    db.prepare('DELETE FROM students WHERE id = ?').run(params.id);
+    db.prepare('DELETE FROM students WHERE id = ?').run(id);
 
     return NextResponse.json({ message: 'Student deleted successfully' });
   } catch (error) {

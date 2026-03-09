@@ -4,8 +4,9 @@ import { getDB } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
     const session = await auth();
     if (!session) {
@@ -18,7 +19,7 @@ export async function GET(
       FROM enrollments e
       JOIN courses c ON e.course_id = c.id
       WHERE e.student_id = ?
-    `).all(params.id);
+    `).all(id);
     
     return NextResponse.json(enrollments);
   } catch (error) {
@@ -28,8 +29,9 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   try {
     const session = await auth();
     if (!session) {
@@ -46,7 +48,7 @@ export async function POST(
     const db = getDB();
     
     // Check if student exists
-    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(params.id);
+    const student = db.prepare('SELECT * FROM students WHERE id = ?').get(id);
     if (!student) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
@@ -62,7 +64,7 @@ export async function POST(
     const result = db.prepare(`
       INSERT INTO enrollments (student_id, course_id, enrollment_date)
       VALUES (?, ?, ?)
-    `).run(params.id, courseId, enrollmentDate);
+    `).run(id, courseId, enrollmentDate);
 
     const enrollment = db.prepare('SELECT * FROM enrollments WHERE id = ?').get(result.lastInsertRowid);
     
